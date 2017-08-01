@@ -1,0 +1,47 @@
+Title: Dawson Creek Transit System Bus - MonTransit
+----------
+Short description:
+Dawson Creek TS buses for MonTransit.
+Schedule. Alerts. News.
+----------
+What's new in this version?:
+Schedule from July 1, 2017 to September 2, 2017.
+Tweets from @BCTransit.
+----------
+Full description:
+This app adds Dawson Creek Transit System (BC Transit) buses information to MonTransit.
+
+This app provides the buses schedule and news from YouTube and @BCTransit on Twitter.
+
+Dawson Creek Transit System buses serve the Dawson Creek in British Columbia, Canada.
+
+Once this application is installed, the MonTransit app will display buses information (schedule...).
+
+This application only has a temporary icon and no screen: download the MonTransit app (free) in the "More ..." section bellow or by following this Google Play link http://goo.gl/pCk5mV
+
+You can install this application on the SD card but it is not recommended.
+
+The information comes from the GTFS file provided by BC Transit.
+https://bctransit.com/*/footer/open-data
+
+This application is free and open-source:
+https://github.com/mtransitapps/ca-dawson-creek-transit-system-bus-android
+
+This app is not related with BC Transit and Dawson Creek Transit System.
+
+Permissions:
+- Other: required to read news from YouTube and Twitter
+----------
+Application type: Applications
+----------
+Category: Transportation
+----------
+Content rating: Low Maturity
+----------
+Website: https://github.com/mtransitapps/ca-dawson-creek-transit-system-bus-android
+----------
+Email: mtransit.apps+GooglePlay@gmail.com
+----------
+Phone:
+----------
+Privacy Policy: https://github.com/mtransitapps/mtransit-for-android/wiki/PrivacyPolicy
