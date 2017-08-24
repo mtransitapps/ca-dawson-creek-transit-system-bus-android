@@ -4,9 +4,9 @@
     <bool name="gtfs_rts_schedule_available">true</bool>
     <bool name="gtfs_rts_frequency_available">false</bool>
     <string name="gtfs_rts_timezone">America/Dawson_Creek</string>
-    <string name="gtfs_rts_area_min_lat">55.738803</string>
-    <string name="gtfs_rts_area_max_lat">55.773461</string>
-    <string name="gtfs_rts_area_min_lng">-120.260031</string>
-    <string name="gtfs_rts_area_max_lng">-120.211401</string>
+    <string name="gtfs_rts_area_min_lat">55.7388025556527</string>
+    <string name="gtfs_rts_area_max_lat">55.7734606030786</string>
+    <string name="gtfs_rts_area_min_lng">-120.26003061513201</string>
+    <string name="gtfs_rts_area_max_lng">-120.211401208522</string>
     <string name="gtfs_rts_color">34B233</string>
 </resources>
