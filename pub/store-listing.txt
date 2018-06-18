@@ -5,7 +5,7 @@ Dawson Creek TS buses for MonTransit.
 Schedule. Alerts. News.
 ----------
 What's new in this version?:
-Schedule from May 17, 2018 to July 2, 2018.
+Schedule from June 15, 2018 to July 2, 2018.
 Tweets from @BCTransit.
 ----------
 Full description:
