@@ -1,2 +1,1 @@
-Dawson Creek TS buses for MonTransit.
-Schedule. Alerts. News.
+Dawson Creek Transit System buses for MonTransit. Schedule. Alerts. News.
