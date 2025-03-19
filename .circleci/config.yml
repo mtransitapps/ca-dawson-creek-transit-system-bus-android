@@ -15,7 +15,7 @@ workflows:
             branches:
                 only:
                     - master
-                    # - mmathieum
+                    - mmathieum # for testing
 jobs:
   mt-job:
     working_directory: ~/mtransit
