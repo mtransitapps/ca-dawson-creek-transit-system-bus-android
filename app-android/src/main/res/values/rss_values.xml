@@ -32,7 +32,7 @@
     </string-array>
     <string-array name="rss_feeds_colors">
         <item>@string/rss_color</item>
-        <item>@string/rss_color</item>
+        <item>@string/bc_transit_color</item>
     </string-array>
     <string-array name="rss_feeds_target">
         <item>@string/rss_target_for_poi_authority</item>
