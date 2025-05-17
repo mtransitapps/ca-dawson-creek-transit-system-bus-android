@@ -9,7 +9,7 @@
         <item>67042447</item>
     </string-array>
     <string-array name="twitter_screen_names_colors">
-        <item>@string/bc_transit_color</item>
+        <item>@string/parent_agency_color</item>
     </string-array>
     <string-array name="twitter_screen_names_noteworthy">
         <item>@string/news_provider_noteworthy_info</item>

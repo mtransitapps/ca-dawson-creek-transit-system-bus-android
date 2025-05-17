@@ -6,6 +6,6 @@
         <item>https://www.youtube.com/user/BCTransitVideos</item>
     </string-array>
     <string-array name="youtube_channels_colors">
-        <item>@string/bc_transit_color</item>
+        <item>@string/parent_agency_color</item>
     </string-array>
 </resources>
