@@ -108,9 +108,7 @@ jobs:
           git checkout -B "${MT_BRANCH_NAME}_update_store_channels"
           git config user.name "$MT_BOT_USER_NAME"
           git config user.email "$MT_BOT_USER_EMAIL"
-          TITLE="Update store channels in \`${MT_BRANCH_NAME}\`"
-          echo "TITLE: $TITLE."
-          git commit -m "$TITLE"
+          git commit -m "Update store channels in \`${MT_BRANCH_NAME}\`"
           git push -u origin "$(git rev-parse --abbrev-ref HEAD)" --force
           exit 0 # success
 
@@ -140,7 +138,7 @@ jobs:
       - name: MT Update pull request (if necessary)
         if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
         run: |
-          gh pr edit --add-assignee montransit
+          gh pr edit --add-assignee montransit --title "Update store channels in \`${MT_BRANCH_NAME}\`"
           gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
