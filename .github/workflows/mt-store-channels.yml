@@ -1,5 +1,5 @@
 # ORIGINAL FILE: https://github.com/mtransitapps/commons/tree/master/shared-overwrite
-name: MT Store (enable/disable channels)
+name: MT Store channels (enable/disable)
 on:
   workflow_dispatch: # manual
     inputs:
