@@ -71,10 +71,6 @@ jobs:
           token: ${{ secrets.MT_PAT }}
           fetch-depth: 0 # fetch all (not required util release build)
 
-      # - name: MT setup
-      #   id: mt-setup
-      #   uses: ./.github/actions/setup
-
       - name: MT Checkout branch
         run: |
           git checkout -B "update_store_channels"
