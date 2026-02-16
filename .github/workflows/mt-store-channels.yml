@@ -4,32 +4,32 @@ on:
   workflow_dispatch: # manual
     inputs:
       alpha-enable:
-        description: 'Enable releases to `Alpha` channel'
+        description: '`Alpha` channel > Enable'
         type: boolean
         default: false
         required: false
       alpha-disable:
-        description: 'Disable releases to `Alpha` channel'
+        description: '`Alpha` channel > Disable'
         type: boolean
         default: false
         required: false
       beta-private-enable:
-        description: 'Enable releases to `Beta Private` channel'
+        description: 'Beta (Private) channel > Enable'
         type: boolean
         default: false
         required: false
       beta-private-disable:
-        description: 'Disable releases to `Beta Private` channel'
+        description: 'Beta (Private) channel > Disable'
         type: boolean
         default: false
         required: false
       production-enable:
-        description: 'Enable releases to `Production` channel'
+        description: '`Production` channel > Enable'
         type: boolean
         default: false
         required: false
       production-disable:
-        description: 'Disable releases to `Production` channel'
+        description: '`Production` channel > Disable'
         type: boolean
         default: false
         required: false
