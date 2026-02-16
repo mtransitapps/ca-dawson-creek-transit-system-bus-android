@@ -122,7 +122,7 @@ jobs:
           gh pr view &>/dev/null
 
       - name: MT Create pull request (if necessary)
-        if: ${{ steps.mt-commit-changes.conclusion == 'success' && steps.mt-check-pr-exists.conclusion == 'failure' }}
+        if: ${{ steps.mt-commit-changes.conclusion == 'success' && steps.mt-check-pr-exists.conclusion != 'success' }}
         continue-on-error: true
         run: |
           gh pr create --fill --assignee montransit --reviewer mtransitapps/reviewers;
