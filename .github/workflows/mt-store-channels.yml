@@ -128,11 +128,11 @@ jobs:
           gh pr create --fill --assignee montransit --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
-      - name: MT Update pull request (if necessary)
-        if: ${{ steps.mt-commit-changes.conclusion == 'success' && steps.mt-check-pr-exists.conclusion == 'success' }}
-        continue-on-error: true
-        run: |
-          gh pr edit --add-reviewer mtransitapps/reviewers;
-        env:
-          GH_TOKEN: ${{ secrets.MT_PAT }}
+      # - name: MT Update pull request (if necessary)
+      #   if: ${{ steps.mt-commit-changes.conclusion == 'success' && steps.mt-check-pr-exists.conclusion == 'success' }}
+      #   continue-on-error: true
+      #   run: |
+      #     gh pr edit --add-reviewer mtransitapps/reviewers;
+      #   env:
+      #     GH_TOKEN: ${{ secrets.MT_PAT }}
 
