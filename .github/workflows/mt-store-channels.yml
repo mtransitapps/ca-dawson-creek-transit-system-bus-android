@@ -121,6 +121,6 @@ jobs:
         if: ${{ steps.mt-commit-changes.conclusion == 'success' }}
         continue-on-error: true
         run: |
-          gh pr view &>/dev/null && echo "PR exists" || gh pr create --fill
+          gh pr view &>/dev/null && gh pr edit --add-reviewer mtransitapps/reviewers || gh pr create --fill --assignee montransit --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
