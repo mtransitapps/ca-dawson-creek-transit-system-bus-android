@@ -125,7 +125,7 @@ jobs:
           exit 0 # success
 
       - name: MT Create pull request (if necessary)
-        if: ${{ failure() && steps.mt-commit-changes.conclusion == 'success' }}
+        if: ${{ steps.mt-commit-changes.conclusion == 'success' }}
         continue-on-error: true
         run: |
           gh pr view &>/dev/null && echo "PR exists" || gh pr create --fill
