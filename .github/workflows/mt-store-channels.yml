@@ -119,7 +119,7 @@ jobs:
           git config user.name "$MT_BOT_USER_NAME"
           git config user.email "$MT_BOT_USER_EMAIL"
           git commit -m "Update store channels"
-          git push -u origin "update_store_channels --force
+          git push -u origin "update_store_channels" --force
 
       - name: MT Create pull request (if necessary)
         run: |
