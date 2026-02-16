@@ -110,24 +110,24 @@ jobs:
           rm -f config/store/production
 
       - name: MT Commit changes
+        continue-on-error: true
+        id: mt-commit-changes
         run: |
           git add -v config/store
           if git diff --staged --quiet; then
             echo "No changes to commit."
-            exit 0
+            exit 1 # fail
           fi
           git config user.name "$MT_BOT_USER_NAME"
           git config user.email "$MT_BOT_USER_EMAIL"
           git commit -m "Update store channels"
           git push -u origin "update_store_channels" --force
+          exit 0 # success
 
       - name: MT Create pull request (if necessary)
+        if: ${{ failure() && steps.mt-commit-changes.conclusion == 'success' }}
+        continue-on-error: true
         run: |
           gh pr view &>/dev/null && echo "PR exists" || gh pr create --fill
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
-
-      # - name: MT push commits
-      #   run: ./push_commits.sh
-      #   env:
-      #     GH_TOKEN: ${{ secrets.MT_PAT }}
