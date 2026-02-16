@@ -1,5 +1,5 @@
 # ORIGINAL FILE: https://github.com/mtransitapps/commons/tree/master/shared-overwrite
-name: MT Store channels (enable/disable)
+name: MT store channels (enable/disable)
 on:
   workflow_dispatch: # manual
     inputs:
@@ -57,7 +57,7 @@ env:
   MT_GIT_COMMIT_OFF: ${{ secrets.MT_GIT_COMMIT_OFF }}
 jobs:
   MT-STORE-CHANNELS-JOB:
-    name: "MT Store channels"
+    name: "MT store channels"
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
