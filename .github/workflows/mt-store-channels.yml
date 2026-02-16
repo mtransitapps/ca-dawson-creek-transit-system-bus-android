@@ -120,6 +120,8 @@ jobs:
         continue-on-error: true
         run: |
           gh pr view &>/dev/null
+        env:
+          GH_TOKEN: ${{ secrets.MT_PAT }}
 
       - name: MT Create pull request (if necessary)
         if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
