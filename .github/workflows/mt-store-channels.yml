@@ -120,9 +120,8 @@ jobs:
         continue-on-error: true
         run: |
           # gh pr view &>/dev/null # incl. closed PRs
-          gh pr list --state open --head "$(git rev-parse --abbrev-ref HEAD)" | wc -l
-          PR_COUNT=$?
-          echo "PR_COUNT: $PR_COUNT."
+          PR_COUNT=$(gh pr list --state open --head "$(git rev-parse --abbrev-ref HEAD)" | wc -l)
+          echo "Pull requests found: $PR_COUNT."
           if [[ $PR_COUNT -eq 0 ]]; then
             exit 1 # fail
           else
