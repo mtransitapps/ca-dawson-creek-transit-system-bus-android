@@ -121,21 +121,26 @@ jobs:
         run: |
           # gh pr view &>/dev/null # incl. closed PRs
           gh pr list --state open --head "$(git rev-parse --abbrev-ref HEAD)" | wc -l
-          exit $? # 0 PR = success
+          PR_COUNT=$?
+          if [[ $PR_COUNT -eq 0 ]]; then
+            exit 1 # fail
+          else
+            exit 0 # success
+          fi
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
 
       - name: MT Create pull request (if necessary)
-        if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
+        if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
         run: |
           gh pr create --fill --assignee montransit
           gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
       - name: MT Update pull request (if necessary)
-        if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
+        if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
         run: |
-          gh pr edit --add-assignee montransit 
+          gh pr edit --add-assignee montransit
           gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
