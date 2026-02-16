@@ -122,6 +122,7 @@ jobs:
           # gh pr view &>/dev/null # incl. closed PRs
           gh pr list --state open --head "$(git rev-parse --abbrev-ref HEAD)" | wc -l
           PR_COUNT=$?
+          echo "PR_COUNT: $PR_COUNT."
           if [[ $PR_COUNT -eq 0 ]]; then
             exit 1 # fail
           else
