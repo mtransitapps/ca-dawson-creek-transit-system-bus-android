@@ -12,7 +12,7 @@ on:
           - disable
         default: ignore
         required: true
-      beta-private:
+      betaPrivate:
         description: 'Beta (Private) channel'
         type: choice
         options:
@@ -64,9 +64,7 @@ jobs:
       - name: MT check out main repository code (no submodules)
         uses: actions/checkout@v6
         with:
-          # submodules: true # required to set right token
           token: ${{ secrets.MT_PAT }}
-          # fetch-depth: 0 # fetch all (not required util release build)
 
       - name: MT Enable `Alpha` channel
         if: ${{ github.event.inputs.alpha == 'enable' }}
@@ -79,12 +77,12 @@ jobs:
           rm -f config/store/alpha
 
       - name: MT Enable `Beta Private` channel
-        if: ${{ github.event.inputs.beta-private == 'enable' }}
+        if: ${{ github.event.inputs.betaPrivate == 'enable' }}
         run: |
           mkdir -p config/store/
           touch config/store/beta-private
       - name: MT Disable `Beta Private` channel
-        if: ${{ github.event.inputs.beta-private == 'disable' }}
+        if: ${{ github.event.inputs.betaPrivate == 'disable' }}
         run: |
           rm -f config/store/beta-private
 
@@ -102,19 +100,19 @@ jobs:
         continue-on-error: true
         id: mt-commit-changes
         run: |
-          git add -v config/store
+          git add -v -A config/store
           if git diff --staged --quiet; then
             echo "No changes to commit."
             exit 1 # fail
           fi
-          git checkout -B "update_store_channels"
+          git checkout -B "$MT_BRANCH_NAME_update_store_channels"
           git config user.name "$MT_BOT_USER_NAME"
           git config user.email "$MT_BOT_USER_EMAIL"
-          git commit -m "Update store channels"
+          git commit -m "Update store channels in `$MT_BRANCH_NAME`"
           git push -u origin "$(git rev-parse --abbrev-ref HEAD)" --force
           exit 0 # success
 
-      - name: MT Check if PR exits
+      - name: MT Check if PR exists
         id: mt-check-pr-exists
         if: ${{ steps.mt-commit-changes.outcome == 'success' }}
         continue-on-error: true
