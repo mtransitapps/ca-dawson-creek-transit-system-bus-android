@@ -108,7 +108,7 @@ jobs:
           git checkout -B "${MT_BRANCH_NAME}_update_store_channels"
           git config user.name "$MT_BOT_USER_NAME"
           git config user.email "$MT_BOT_USER_EMAIL"
-          git commit -m "Update store channels in `$MT_BRANCH_NAME`"
+          git commit -m "Update store channels in `${MT_BRANCH_NAME}`"
           git push -u origin "$(git rev-parse --abbrev-ref HEAD)" --force
           exit 0 # success
 
