@@ -116,20 +116,20 @@ jobs:
 
       - name: MT Check if PR exits
         id: mt-check-pr-exists
-        if: ${{ steps.mt-commit-changes.conclusion == 'success' }}
+        if: ${{ steps.mt-commit-changes.outcome == 'success' }}
         continue-on-error: true
         run: |
           gh pr view &>/dev/null
 
       - name: MT Create pull request (if necessary)
-        if: ${{ steps.mt-commit-changes.conclusion == 'success' && steps.mt-check-pr-exists.conclusion != 'success' }}
+        if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
         continue-on-error: true
         run: |
           gh pr create --fill --assignee montransit --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
       # - name: MT Update pull request (if necessary)
-      #   if: ${{ steps.mt-commit-changes.conclusion == 'success' && steps.mt-check-pr-exists.conclusion == 'success' }}
+      #   if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
       #   continue-on-error: true
       #   run: |
       #     gh pr edit --add-reviewer mtransitapps/reviewers;
