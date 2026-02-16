@@ -125,14 +125,15 @@ jobs:
         if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
         continue-on-error: true
         run: |
-          gh pr create --fill --assignee montransit --reviewer mtransitapps/reviewers;
+          gh pr create --fill --assignee montransit
+          gh pr comment "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}
-      # - name: MT Update pull request (if necessary)
-      #   if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
-      #   continue-on-error: true
-      #   run: |
-      #     gh pr edit --add-reviewer mtransitapps/reviewers;
-      #   env:
-      #     GH_TOKEN: ${{ secrets.MT_PAT }}
-
+      - name: MT Update pull request (if necessary)
+        if: ${{ steps.mt-commit-changes.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          gh pr edit --add-assignee montransit 
+          gh pr comment "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
+        env:
+          GH_TOKEN: ${{ secrets.MT_PAT }}
