@@ -3,38 +3,35 @@ name: MT Store channels (enable/disable)
 on:
   workflow_dispatch: # manual
     inputs:
-      alpha-enable:
-        description: 'Alpha channel > Enable'
-        type: boolean
-        default: false
-        required: false
-      alpha-disable:
-        description: 'Alpha channel > Disable'
-        type: boolean
-        default: false
-        required: false
-      beta-private-enable:
-        description: 'Beta (Private) channel > Enable'
-        type: boolean
-        default: false
-        required: false
-      beta-private-disable:
-        description: 'Beta (Private) channel > Disable'
-        type: boolean
-        default: false
-        required: false
-      production-enable:
-        description: 'Production channel > Enable'
-        type: boolean
-        default: false
-        required: false
-      production-disable:
-        description: 'Production channel > Disable'
-        type: boolean
-        default: false
-        required: false
+      alpha:
+        description: 'Alpha channel'
+        type: choice
+        options:
+          - ignore
+          - enable
+          - disable
+        default: ignore
+        required: true
+      beta-private:
+        description: 'Beta (Private) channel'
+        type: choice
+        options:
+          - ignore
+          - enable
+          - disable
+        default: ignore
+        required: true
+      production:
+        description: 'Production channel'
+        type: choice
+        options:
+          - ignore
+          - enable
+          - disable
+        default: ignore
+        required: true
 # gh workflow run mt-store-channels.yml --ref $(git rev-parse --abbrev-ref HEAD)
-# gh workflow run mt-store-channels.yml -f production-disable=true
+# gh workflow run mt-store-channels.yml -f alpha=enable -f beta-private=disable -f production=ignore
 # gh run list --workflow=mt-store-channels.yml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -76,32 +73,32 @@ jobs:
           git checkout -B "update_store_channels"
 
       - name: MT Enable `Alpha` channel
-        if: ${{ github.event.inputs.alpha-enable == 'true' }}
+        if: ${{ github.event.inputs.alpha == 'enable' }}
         run: |
           mkdir -p config/store/
           touch config/store/alpha
       - name: MT Disable `Alpha` channel
-        if: ${{ github.event.inputs.alpha-disable == 'true' }}
+        if: ${{ github.event.inputs.alpha == 'disable' }}
         run: |
           rm -f config/store/alpha
 
       - name: MT Enable `Beta Private` channel
-        if: ${{ github.event.inputs.beta-private-enable == 'true' }}
+        if: ${{ github.event.inputs.beta-private == 'enable' }}
         run: |
           mkdir -p config/store/
           touch config/store/beta-private
       - name: MT Disable `Beta Private` channel
-        if: ${{ github.event.inputs.beta-private-disable == 'true' }}
+        if: ${{ github.event.inputs.beta-private == 'disable' }}
         run: |
           rm -f config/store/beta-private
 
       - name: MT Enable `Production` channel
-        if: ${{ github.event.inputs.production-enable == 'true' }}
+        if: ${{ github.event.inputs.production == 'enable' }}
         run: |
           mkdir -p config/store/
           touch config/store/production
       - name: MT Disable `Production` channel
-        if: ${{ github.event.inputs.production-disable == 'true' }}
+        if: ${{ github.event.inputs.production == 'disable' }}
         run: |
           rm -f config/store/production
 
@@ -121,7 +118,7 @@ jobs:
           exit 0 # success
 
       - name: MT Create pull request (if necessary)
-        if: ${{ steps.mt-commit-changes.conclusion == 'success' }}
+        if: ${{ failure() && steps.mt-commit-changes.conclusion == 'success' }}
         continue-on-error: true
         run: |
           gh pr view &>/dev/null && echo "PR exists" || gh pr create --fill
