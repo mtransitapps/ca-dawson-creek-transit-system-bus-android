@@ -1,6 +1,7 @@
 # ORIGINAL FILE: https://github.com/mtransitapps/commons/tree/master/shared-overwrite
 name: MT record screenshots
 on:
+  pull_request: #DEBUG
   workflow_dispatch: # manual
 # gh workflow run mt-record-screenshots.yml --ref $(git rev-parse --abbrev-ref HEAD)
 # gh run list --workflow=mt-record-screenshots.yml
@@ -88,8 +89,6 @@ jobs:
         id: download-module-apk
         run: |
           REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-          # TEMPORARY DEBUG: Override REPO_NAME for testing
-          REPO_NAME="ca-dawson-creek-transit-system-bus-android"
           MODULE_REPO="mtransitapps/${REPO_NAME}"
           RELEASE_URL="https://api.github.com/repos/${MODULE_REPO}/releases/latest"
           
