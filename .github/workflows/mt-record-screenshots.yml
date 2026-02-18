@@ -1,0 +1,225 @@
+# ORIGINAL FILE: https://github.com/mtransitapps/commons/tree/master/shared-overwrite
+name: MT record screenshots
+on:
+  workflow_dispatch: # manual
+# gh workflow run mt-record-screenshots.yml --ref $(git rev-parse --abbrev-ref HEAD)
+# gh run list --workflow=mt-record-screenshots.yml
+# gh run watch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  MT_BOT_USER_NAME: ${{ vars.MT_BOT_USER_NAME }}
+  MT_BOT_USER_EMAIL: ${{ vars.MT_BOT_USER_EMAIL }}
+  # git branches & sha
+  MT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  MT_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  MT_TARGET_BRANCH_NAME: ${{ github.base_ref || github.ref_name }}
+  MT_DEFAULT_BRANCH_NAME: ${{ github.event.repository.default_branch }}
+  # repo type
+  MT_IS_SUBMODULE: ${{ contains(fromJSON('["mtransitapps/commons", "mtransitapps/commons-java", "mtransitapps/parser", "mtransitapps/commons-android"]'), github.repository) }}
+  MT_IS_MAIN_REPO: ${{ endsWith(github.repository, '/mtransit-for-android') }}
+  MT_IS_AGENCY_REPO: ${{ ! contains(fromJSON('["mtransitapps/commons", "mtransitapps/commons-java", "mtransitapps/parser", "mtransitapps/commons-android"]'), github.repository) && ! endsWith(github.repository, '/mtransit-for-android')}}
+  MT_IS_AGENCY_RDS: ${{ ! contains(github.repository, '-bike-') }}
+  MT_IS_AGENCY_BIKE: ${{ contains(github.repository, '-bike-') }}
+  # git commit & push
+  MT_ORG_GIT_COMMIT_ON: ${{ secrets.MT_ORG_GIT_COMMIT_ON }}
+  MT_ORG_GIT_COMMIT_OFF: ${{ secrets.MT_ORG_GIT_COMMIT_OFF }}
+  MT_GIT_COMMIT_ON: ${{ secrets.MT_GIT_COMMIT_ON }}
+  MT_GIT_COMMIT_OFF: ${{ secrets.MT_GIT_COMMIT_OFF }}
+jobs:
+  MT-RECORD-SCREENSHOTS-JOB:
+    name: "MT record screenshots"
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: MT check out main repository code
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.MT_PAT }}
+
+      - name: MT setup
+        uses: ./.github/actions/setup
+
+      - name: MT read sdk-target from gradle/libs.versions.toml
+        id: sdk-target
+        run: |
+          SDK_TARGET=$(grep -E '^sdk-target\s*=\s*"[0-9]+"' commons/gradle/libs.versions.toml | sed -E 's/.*"([0-9]+)".*/\1/')
+          echo "API_LEVEL=${SDK_TARGET}" >> $GITHUB_OUTPUT
+          echo "Using API level: ${SDK_TARGET}"
+
+      - name: MT enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: MT download main app release APK
+        id: download-main-apk
+        run: |
+          MAIN_APP_REPO="mtransitapps/mtransit-for-android"
+          RELEASE_URL="https://api.github.com/repos/${MAIN_APP_REPO}/releases/latest"
+          
+          echo "Fetching latest release info from: $RELEASE_URL"
+          RESPONSE=$(curl -f -s "$RELEASE_URL")
+          
+          APK_URL=$(echo "$RESPONSE" | grep "browser_download_url.*\.apk" | head -1 | cut -d '"' -f 4)
+          
+          if [ -z "$APK_URL" ]; then
+            echo "ERROR: Could not find APK in latest release"
+            exit 1
+          fi
+          
+          echo "Found APK URL: $APK_URL"
+          
+          MAIN_APK_FILE="${RUNNER_TEMP}/mtransit-main.apk"
+          echo "Downloading to: $MAIN_APK_FILE"
+          curl -f -L -o "$MAIN_APK_FILE" "$APK_URL"
+          
+          if [ ! -f "$MAIN_APK_FILE" ] || [ ! -s "$MAIN_APK_FILE" ]; then
+            echo "ERROR: Failed to download APK or file is empty"
+            exit 1
+          fi
+          
+          echo "MAIN_APK_FILE=$MAIN_APK_FILE" >> $GITHUB_OUTPUT
+          echo "Main app APK downloaded successfully"
+
+      - name: MT download this app release APK
+        id: download-module-apk
+        run: |
+          REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+          # TEMPORARY DEBUG: Override REPO_NAME for testing
+          REPO_NAME="ca-dawson-creek-transit-system-bus-android"
+          MODULE_REPO="mtransitapps/${REPO_NAME}"
+          RELEASE_URL="https://api.github.com/repos/${MODULE_REPO}/releases/latest"
+          
+          echo "Repository: $REPO_NAME"
+          echo "Fetching latest release info from: $RELEASE_URL"
+          
+          RESPONSE=$(curl -f -s "$RELEASE_URL" 2>/dev/null)
+          
+          if [ $? -ne 0 ]; then
+            echo "ERROR: Could not fetch release info"
+            exit 1
+          fi
+          
+          APK_URL=$(echo "$RESPONSE" | grep "browser_download_url.*\.apk" | head -1 | cut -d '"' -f 4)
+          
+          if [ -z "$APK_URL" ]; then
+            echo "ERROR: Could not find APK in latest release"
+            exit 1
+          fi
+          
+          echo "Found module APK URL: $APK_URL"
+          
+          MODULE_APK_FILE="${RUNNER_TEMP}/mtransit-module.apk"
+          echo "Downloading to: $MODULE_APK_FILE"
+          curl -f -L -o "$MODULE_APK_FILE" "$APK_URL"
+          
+          if [ ! -f "$MODULE_APK_FILE" ] || [ ! -s "$MODULE_APK_FILE" ]; then
+            echo "ERROR: Failed to download module APK or file is empty"
+            exit 1
+          fi
+          
+          echo "MODULE_APK_FILE=$MODULE_APK_FILE" >> $GITHUB_OUTPUT
+          echo "Module app APK downloaded successfully"
+
+      - name: MT debug - verify setup script exists
+        run: |
+          echo "Checking for setup-and-all-app-screenshots.sh script..."
+          if [ -f "./setup-and-all-app-screenshots.sh" ]; then
+            echo "✓ Script found at ./setup-and-all-app-screenshots.sh"
+            ls -lh ./setup-and-all-app-screenshots.sh
+          else
+            echo "✗ Script NOT found at ./setup-and-all-app-screenshots.sh"
+            echo "Listing root directory contents:"
+            ls -al
+            echo "ERROR: setup-and-all-app-screenshots.sh script is required but not found"
+            exit 1
+          fi
+
+      - name: MT record screenshots with Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          MAIN_APK_FILE: ${{ steps.download-main-apk.outputs.MAIN_APK_FILE }}
+          MODULE_APK_FILE: ${{ steps.download-module-apk.outputs.MODULE_APK_FILE }}
+        with:
+          api-level: ${{ steps.sdk-target.outputs.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7_pro
+          force-avd-creation: false
+          disable-animations: true
+          disable-spellchecker: true
+          disable-linux-hw-accel: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: ./setup-and-all-app-screenshots.sh
+
+      - name: MT upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.sha }}
+          path: |
+            app-android/src/main/play/listings/*/graphics/*-screenshots/*.png
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: MT commit screenshots
+        continue-on-error: true
+        id: mt-commit-screenshots
+        run: |
+          # Check if screenshots were generated
+          SCREENSHOT_COUNT=$(find app-android/src/main/play/listings -type d -name '*-screenshots' -exec find {} -type f -name '*.png' \; 2>/dev/null | wc -l)
+          
+          if [ "$SCREENSHOT_COUNT" -gt 0 ]; then
+            echo "Found $SCREENSHOT_COUNT screenshot file(s)."
+            
+            git add -v -A app-android/src/main/play/listings/
+            
+            if git diff --staged --quiet; then
+              echo "No new screenshots to commit."
+              exit 1 # fail
+            fi
+            
+            git checkout -B "${MT_BRANCH_NAME}_update_screenshots"
+            git config user.name "$MT_BOT_USER_NAME"
+            git config user.email "$MT_BOT_USER_EMAIL"
+            git commit -m "Update screenshots in \`${MT_BRANCH_NAME}\`"
+            git push -u origin "${MT_BRANCH_NAME}_update_screenshots" --force
+            exit 0 # success
+          else
+            echo "No screenshots found."
+            exit 1 # fail
+          fi
+
+      - name: MT check if PR exists
+        id: mt-check-pr-exists
+        if: ${{ steps.mt-commit-screenshots.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          PR_COUNT=$(gh pr list --state open --head "${MT_BRANCH_NAME}_update_screenshots" | wc -l)
+          echo "Pull requests found: $PR_COUNT."
+          if [[ $PR_COUNT -eq 0 ]]; then
+            exit 1 # fail
+          else
+            exit 0 # success
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.MT_PAT }}
+
+      - name: MT create pull request (if necessary)
+        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
+        run: |
+          gh pr create --fill --assignee montransit
+          gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
+        env:
+          GH_TOKEN: ${{ secrets.MT_PAT }}
+
+      - name: MT update pull request (if necessary)
+        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
+        run: |
+          gh pr edit --add-assignee montransit --title "Update screenshots in \`${MT_BRANCH_NAME}\`"
+          gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
+        env:
+          GH_TOKEN: ${{ secrets.MT_PAT }}

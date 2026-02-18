@@ -208,6 +208,7 @@ dev.properties
 /publish_app_release.sh
 /push_commits.sh
 /set_app_release_required.sh
+/setup-and-all-app-screenshots.sh
 /settings.gradle
 /test.sh
 /test_only.sh
