@@ -1,7 +1,6 @@
 # ORIGINAL FILE: https://github.com/mtransitapps/commons/tree/master/shared-overwrite
 name: MT record screenshots
 on:
-  pull_request: #DEBUG
   workflow_dispatch: # manual
 # gh workflow run mt-record-screenshots.yml --ref $(git rev-parse --abbrev-ref HEAD)
 # gh run list --workflow=mt-record-screenshots.yml
