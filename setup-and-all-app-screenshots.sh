@@ -3,8 +3,9 @@
 # This script:
 # 1. Installs the main mtransit-for-android app (APK path from env var)
 # 2. Grants location permission to the main app
-# 3. Installs the current repository's module app (APK path from env var)
-# 4. Calls the screenshot recording script
+# 3. Sets GPS location based on GTFS area bounds
+# 4. Installs the current repository's module app (APK path from env var)
+# 5. Calls the screenshot recording script
 
 set -e
 
@@ -44,6 +45,35 @@ adb shell pm grant "$MAIN_APP_PACKAGE" android.permission.ACCESS_COARSE_LOCATION
 
 echo " - Location permissions granted"
 
+echo ">> Step 2.5: Set emulator GPS location..."
+
+# Parse GPS coordinates from XML if available
+GPS_XML_FILE="app-android/src/main/res-current/values/current_gtfs_rts_values_gen.xml"
+if [ -f "$GPS_XML_FILE" ]; then
+  echo " - Found GPS coordinates file: $GPS_XML_FILE"
+  
+  # Extract min/max lat/lng values using xmllint
+  MIN_LAT=$(xmllint --xpath "string(//resources/string[@name='current_gtfs_rts_area_min_lat']/text())" "$GPS_XML_FILE" 2>/dev/null || echo "")
+  MAX_LAT=$(xmllint --xpath "string(//resources/string[@name='current_gtfs_rts_area_max_lat']/text())" "$GPS_XML_FILE" 2>/dev/null || echo "")
+  MIN_LNG=$(xmllint --xpath "string(//resources/string[@name='current_gtfs_rts_area_min_lng']/text())" "$GPS_XML_FILE" 2>/dev/null || echo "")
+  MAX_LNG=$(xmllint --xpath "string(//resources/string[@name='current_gtfs_rts_area_max_lng']/text())" "$GPS_XML_FILE" 2>/dev/null || echo "")
+  
+  if [ -n "$MIN_LAT" ] && [ -n "$MAX_LAT" ] && [ -n "$MIN_LNG" ] && [ -n "$MAX_LNG" ]; then
+    # Calculate center point (average of min and max)
+    CENTER_LAT=$(echo "scale=6; ($MIN_LAT + $MAX_LAT) / 2" | bc)
+    CENTER_LNG=$(echo "scale=6; ($MIN_LNG + $MAX_LNG) / 2" | bc)
+    
+    echo " - Setting GPS location to center: $CENTER_LAT, $CENTER_LNG"
+    adb emu geo fix "$CENTER_LNG" "$CENTER_LAT"
+    
+    echo " - GPS location set successfully"
+  else
+    echo " > WARNING: Could not parse GPS coordinates from XML"
+  fi
+else
+  echo " - No GPS coordinates file found, skipping GPS setup"
+fi
+
 echo ">> Step 3: Install current repository module app..."
 
 if [ -n "$MODULE_APK_FILE" ] && [ -f "$MODULE_APK_FILE" ]; then
@@ -69,7 +99,15 @@ else
   echo " - No module APK provided or file not found, skipping module installation"
 fi
 
-echo ">> Step 4: Record screenshots..."
+echo ">> Step 4: Disable Pixel Launcher to prevent crashes..."
+
+# Stop Pixel Launcher to prevent "not responding" dialogs during screenshot capture
+adb shell am force-stop com.google.android.apps.nexuslauncher || true
+adb shell pm disable-user --user 0 com.google.android.apps.nexuslauncher || true
+
+echo " - Pixel Launcher disabled"
+
+echo ">> Step 5: Record screenshots..."
 
 # Call the screenshot recording script
 if [ -f "./commons-android/pub/all-app-screenshots.sh" ]; then
