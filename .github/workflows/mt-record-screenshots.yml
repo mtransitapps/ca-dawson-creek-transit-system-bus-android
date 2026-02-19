@@ -136,9 +136,27 @@ jobs:
             exit 1
           fi
 
+      - name: MT read timezone from gtfs_rts_values_gen.xml (optional)
+        id: timezone
+        continue-on-error: true
+        run: |
+          TIMEZONE_XML_FILE="app-android/src/main/res/values/gtfs_rts_values_gen.xml"
+          if [ -f "$TIMEZONE_XML_FILE" ]; then
+            TIMEZONE=$(xmllint --xpath "string(//resources/string[@name='gtfs_rts_timezone']/text())" "$TIMEZONE_XML_FILE" 2>/dev/null || echo "")
+            if [ -n "$TIMEZONE" ]; then
+              echo "TIMEZONE=${TIMEZONE}" >> $GITHUB_OUTPUT
+              echo "Found timezone: ${TIMEZONE}"
+            else
+              echo "No timezone found in XML"
+            fi
+          else
+            echo "No gtfs_rts_values_gen.xml file found"
+          fi
+
       - name: MT record screenshots with Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
+          TZ: ${{ steps.timezone.outputs.TIMEZONE || 'UTC' }}
           MAIN_APK_FILE: ${{ steps.download-main-apk.outputs.MAIN_APK_FILE }}
           MODULE_APK_FILE: ${{ steps.download-module-apk.outputs.MODULE_APK_FILE }}
         with:
@@ -213,7 +231,7 @@ jobs:
         if: ${{ steps.mt-commit-screenshots.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          gh pr create --title "$COMMIT_MSG" --body "$COMMIT_MSG" --assignee montransit
+          gh pr create --base "${MT_BRANCH_NAME}" --title "$COMMIT_MSG" --body "$COMMIT_MSG" --assignee montransit
           gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
         env:
           GH_TOKEN: ${{ secrets.MT_PAT }}

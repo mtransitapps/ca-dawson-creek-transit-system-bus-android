@@ -70,6 +70,28 @@ if [ -f "$GPS_XML_FILE" ]; then
   else
     echo " > WARNING: Could not parse GPS coordinates from XML"
   fi
+elif [ -f "app-android/src/main/res/values/bike_station_values.xml" ]; then
+  BIKE_GPS_XML_FILE="app-android/src/main/res/values/bike_station_values.xml"
+  echo " - Found bike station coordinates file: $BIKE_GPS_XML_FILE"
+  
+  # Extract min/max lat/lng values using xmllint
+  MIN_LAT=$(xmllint --xpath "string(//resources/string[@name='bike_station_area_min_lat']/text())" "$BIKE_GPS_XML_FILE" 2>/dev/null || echo "")
+  MAX_LAT=$(xmllint --xpath "string(//resources/string[@name='bike_station_area_max_lat']/text())" "$BIKE_GPS_XML_FILE" 2>/dev/null || echo "")
+  MIN_LNG=$(xmllint --xpath "string(//resources/string[@name='bike_station_area_min_lng']/text())" "$BIKE_GPS_XML_FILE" 2>/dev/null || echo "")
+  MAX_LNG=$(xmllint --xpath "string(//resources/string[@name='bike_station_area_max_lng']/text())" "$BIKE_GPS_XML_FILE" 2>/dev/null || echo "")
+  
+  if [ -n "$MIN_LAT" ] && [ -n "$MAX_LAT" ] && [ -n "$MIN_LNG" ] && [ -n "$MAX_LNG" ]; then
+    # Calculate center point (average of min and max)
+    CENTER_LAT=$(echo "scale=6; ($MIN_LAT + $MAX_LAT) / 2" | bc)
+    CENTER_LNG=$(echo "scale=6; ($MIN_LNG + $MAX_LNG) / 2" | bc)
+    
+    echo " - Setting GPS location to center: $CENTER_LAT, $CENTER_LNG"
+    adb emu geo fix "$CENTER_LNG" "$CENTER_LAT"
+    
+    echo " - GPS location set successfully"
+  else
+    echo " > WARNING: Could not parse bike station coordinates from XML"
+  fi
 else
   echo " - No GPS coordinates file found, skipping GPS setup"
 fi
