@@ -2,7 +2,14 @@
 name: MT record screenshots
 on:
   workflow_dispatch: # manual
+    inputs:
+      commitDirectly:
+        description: 'Commit directly to current branch (without PR)'
+        required: false
+        default: false
+        type: boolean
 # gh workflow run mt-record-screenshots.yml --ref $(git rev-parse --abbrev-ref HEAD)
+# gh workflow run mt-record-screenshots.yml --ref $(git rev-parse --abbrev-ref HEAD) -f commitDirectly=true
 # gh run list --workflow=mt-record-screenshots.yml
 # gh run watch
 concurrency:
@@ -199,11 +206,19 @@ jobs:
               exit 1 # fail
             fi
             
-            git checkout -B "${MT_BRANCH_NAME}_update_screenshots"
             git config user.name "$MT_BOT_USER_NAME"
             git config user.email "$MT_BOT_USER_EMAIL"
-            git commit -m "Update screenshots in \`${MT_BRANCH_NAME}\`"
-            git push -u origin "${MT_BRANCH_NAME}_update_screenshots" --force
+            
+            if [ "${{ github.event.inputs.commitDirectly }}" = "true" ]; then
+              echo "Committing directly to current branch: ${MT_BRANCH_NAME}"
+              git commit -m "Update screenshots in \`${MT_BRANCH_NAME}\`"
+              git push origin "${MT_BRANCH_NAME}"
+            else
+              echo "Creating new branch and preparing for PR: ${MT_BRANCH_NAME}_update_screenshots"
+              git checkout -B "${MT_BRANCH_NAME}_update_screenshots"
+              git commit -m "Update screenshots in \`${MT_BRANCH_NAME}\`"
+              git push -u origin "${MT_BRANCH_NAME}_update_screenshots" --force
+            fi
             exit 0 # success
           else
             echo "No screenshots found."
@@ -212,7 +227,7 @@ jobs:
 
       - name: MT check if PR exists
         id: mt-check-pr-exists
-        if: ${{ steps.mt-commit-screenshots.outcome == 'success' }}
+        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && github.event.inputs.commitDirectly != 'true' }}
         continue-on-error: true
         run: |
           # Fetch the branch to ensure it exists in the remote tracking
@@ -229,7 +244,7 @@ jobs:
           GH_TOKEN: ${{ secrets.MT_PAT }}
 
       - name: MT create pull request (if necessary)
-        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'failure' }}
+        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && github.event.inputs.commitDirectly != 'true' && steps.mt-check-pr-exists.outcome == 'failure' }}
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           gh pr create --base "${MT_BRANCH_NAME}" --title "$COMMIT_MSG" --body "$COMMIT_MSG" --assignee montransit
@@ -238,7 +253,7 @@ jobs:
           GH_TOKEN: ${{ secrets.MT_PAT }}
 
       - name: MT update pull request (if necessary)
-        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && steps.mt-check-pr-exists.outcome == 'success' }}
+        if: ${{ steps.mt-commit-screenshots.outcome == 'success' && github.event.inputs.commitDirectly != 'true' && steps.mt-check-pr-exists.outcome == 'success' }}
         run: |
           gh pr edit --add-assignee montransit --title "Update screenshots in \`${MT_BRANCH_NAME}\`"
           gh pr comment --body "@mtransitapps/reviewers please review" # --reviewer mtransitapps/reviewers;
