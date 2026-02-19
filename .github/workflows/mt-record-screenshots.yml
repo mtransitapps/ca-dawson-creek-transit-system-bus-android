@@ -170,7 +170,7 @@ jobs:
           api-level: ${{ steps.sdk-target.outputs.API_LEVEL }}
           target: google_apis
           arch: x86_64
-          profile: pixel_7_pro
+          profile: pixel_4_xl
           force-avd-creation: false
           disable-animations: true
           disable-spellchecker: true
