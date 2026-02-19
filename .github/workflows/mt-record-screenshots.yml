@@ -168,7 +168,7 @@ jobs:
           disable-animations: true
           disable-spellchecker: true
           disable-linux-hw-accel: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
+          emulator-options: -no-window -gpu host -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           script: ./setup-and-all-app-screenshots.sh
 
       - name: MT upload screenshots

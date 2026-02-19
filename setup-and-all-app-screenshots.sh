@@ -129,7 +129,17 @@ adb shell pm disable-user --user 0 com.google.android.apps.nexuslauncher || true
 
 echo " - Pixel Launcher disabled"
 
-echo ">> Step 5: Record screenshots..."
+echo ">> Step 5: Launch main app and wait for initialization..."
+
+# Launch the main app once to let it initialize (download data, etc.)
+adb shell monkey -p org.mtransit.android -c android.intent.category.LAUNCHER 1
+
+echo " - Main app launched, waiting 10 seconds for initialization..."
+sleep 10
+
+echo " - Main app initialized"
+
+echo ">> Step 6: Record screenshots..."
 
 # Call the screenshot recording script
 if [ -f "./commons-android/pub/all-app-screenshots.sh" ]; then
