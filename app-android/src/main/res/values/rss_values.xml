@@ -29,4 +29,12 @@
         <item>@integer/news_provider_severity_info_agency</item>
         <item>@integer/news_provider_severity_info_unknown</item>
     </integer-array>
+    <string-array name="rss_feeds_date_link_fallback_regex">
+        <item>\\d{2}-\\d{2}-\\d{4}</item>
+        <item>\\d{2}-\\d{2}-\\d{4}</item>
+    </string-array>
+    <string-array name="rss_feeds_date_link_fallback_format">
+        <item>MM-dd-yyyy</item>
+        <item>MM-dd-yyyy</item>
+    </string-array>
 </resources>
