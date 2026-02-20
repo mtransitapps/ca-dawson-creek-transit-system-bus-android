@@ -37,7 +37,7 @@ env:
 jobs:
   MT-RECORD-SCREENSHOTS-JOB:
     name: "MT record screenshots"
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: MT check out main repository code
@@ -129,20 +129,6 @@ jobs:
           echo "MODULE_APK_FILE=$MODULE_APK_FILE" >> $GITHUB_OUTPUT
           echo "Module app APK downloaded successfully"
 
-      - name: MT debug - verify setup script exists
-        run: |
-          echo "Checking for setup-and-all-app-screenshots.sh script..."
-          if [ -f "./setup-and-all-app-screenshots.sh" ]; then
-            echo "✓ Script found at ./setup-and-all-app-screenshots.sh"
-            ls -lh ./setup-and-all-app-screenshots.sh
-          else
-            echo "✗ Script NOT found at ./setup-and-all-app-screenshots.sh"
-            echo "Listing root directory contents:"
-            ls -al
-            echo "ERROR: setup-and-all-app-screenshots.sh script is required but not found"
-            exit 1
-          fi
-
       - name: MT read timezone from gtfs_rts_values_gen.xml (optional)
         id: timezone
         continue-on-error: true
@@ -162,6 +148,7 @@ jobs:
 
       - name: MT record screenshots with Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 10
         env:
           TZ: ${{ steps.timezone.outputs.TIMEZONE || 'UTC' }}
           MAIN_APK_FILE: ${{ steps.download-main-apk.outputs.MAIN_APK_FILE }}
