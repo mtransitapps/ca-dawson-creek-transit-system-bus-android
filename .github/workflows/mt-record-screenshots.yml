@@ -64,7 +64,7 @@ jobs:
       - name: MT download main app release APK
         id: download-main-apk
         run: |
-          ./download_latest_apk.sh "mtransitapps/mtransit-for-android"
+          source ./download_latest_apk.sh "mtransitapps/mtransit-for-android"
           if [[ -z "$APK_FILE" ]]; then
             echo "ERROR: no APK file!"
             exit 1 # error
@@ -77,7 +77,7 @@ jobs:
         run: |
           REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
           MODULE_REPO="mtransitapps/${REPO_NAME}"
-          ./download_latest_apk.sh "$MODULE_REPO"
+          source ./download_latest_apk.sh "$MODULE_REPO"
           if [[ -z "$APK_FILE" ]]; then
             echo "ERROR: no APK file!"
             exit 1 # error
