@@ -106,7 +106,7 @@ jobs:
 
       - name: MT setup
         id: mt-setup
-        uses: mtransitapps/gh-actions/.github/actions/setup@v1.1.1
+        uses: mtransitapps/gh-actions/.github/actions/setup@ec45b2649975f6d4734981853ea94a148b204b10
         with:
           code-sync: ${{ github.ref == format('refs/heads/{0}', env.MT_DEFAULT_BRANCH_NAME) }}
 
