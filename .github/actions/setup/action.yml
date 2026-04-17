@@ -13,29 +13,33 @@ runs:
   using: "composite"
   steps:
 
-      - name: MT check out submodules
+      - name: MT init submodules
         shell: bash
         run: ./checkout_submodules.sh
 
-      - name: MT switch all git submodule closest branch
+      - name: MT switching all git submodules to target branch
         if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
-          echo "[MT] > Switching submodules closest branch, '$MT_BRANCH_NAME' or '$MT_TARGET_BRANCH_NAME' or '$MT_DEFAULT_BRANCH_NAME':"
-          git submodule foreach 'git switch $MT_BRANCH_NAME || git switch $MT_TARGET_BRANCH_NAME || git switch $MT_DEFAULT_BRANCH_NAME'
+          # echo "[MT] > Switching submodules closest branch, '$MT_BRANCH_NAME' or '$MT_TARGET_BRANCH_NAME' or '$MT_DEFAULT_BRANCH_NAME':"
+          # git submodule foreach 'git switch $MT_BRANCH_NAME || git switch $MT_TARGET_BRANCH_NAME || git switch $MT_DEFAULT_BRANCH_NAME'
+          echo "[MT] > Switching submodules target branch '$MT_BRANCH_NAME' or stay detached:"
+          git submodule foreach 'git switch $MT_BRANCH_NAME || echo "[MT] > Staying detached (not on a branch)."'
           echo "[MT] > Showing submodules current branch:"
           git submodule foreach 'git branch --show-current'
 
-      - name: MT switch this repo PR branch to allow push commits
+      - name: MT switching this repo PR branch to allow push commits
         if: env.MT_IS_AGENCY_REPO == 'true' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
         shell: bash
         run: |
-          echo "[MT] > Switching this repo closest branch, '$MT_BRANCH_NAME' or '$MT_TARGET_BRANCH_NAME':"
-          git switch $MT_BRANCH_NAME || git switch $MT_TARGET_BRANCH_NAME
+          # echo "[MT] > Switching this repo closest branch, '$MT_BRANCH_NAME' or '$MT_TARGET_BRANCH_NAME':"
+          # git switch $MT_BRANCH_NAME || git switch $MT_TARGET_BRANCH_NAME
+          echo "[MT] > Switching this repo target branch '$MT_BRANCH_NAME' or stay detached:"
+          git switch $MT_BRANCH_NAME || echo "[MT] > Staying detached (not on a branch)."
           echo "[MT] > Showing this repo current branch:"
           git branch --show-current
 
-      - name: MT switch this submodule repo build SHA
+      - name: MT switching this submodule repo build SHA
         if: env.MT_IS_SUBMODULE == 'true'
         shell: bash
         run: |
