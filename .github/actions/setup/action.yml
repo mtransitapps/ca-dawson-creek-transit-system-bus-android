@@ -35,14 +35,14 @@ runs:
           echo "[MT] > Showing this repo current branch:"
           git branch --show-current
 
-      - name: MT check out this submodule repo build SHA
+      - name: MT switch this submodule repo build SHA
         if: env.MT_IS_SUBMODULE == 'true'
         shell: bash
         run: |
           REPOSITORY_OWNER_AND_NAME=${{ github.repository }};
           REPOSITORY_NAME=$(basename $REPOSITORY_OWNER_AND_NAME);
-          echo "[MT] > Checking out this repo '$REPOSITORY_NAME' workflow sha '$MT_SHA':"
-          git -C $REPOSITORY_NAME checkout $MT_SHA;
+          echo "[MT] > Switching this repo '$REPOSITORY_NAME' workflow sha '$MT_SHA':"
+          git -C $REPOSITORY_NAME switch --detach $MT_SHA;
 
       - name: MT setup MT_GIT_BRANCH env
         if: github.repository == 'mtransitapps/mtransit-for-android' || github.event_name != 'pull_request'
