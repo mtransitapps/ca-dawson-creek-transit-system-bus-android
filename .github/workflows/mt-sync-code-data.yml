@@ -196,8 +196,8 @@ jobs:
         env:
           MT_GENERATE_IMAGES: true
 
-      - name: MT commit image change
-        if: ${{ env.MT_IS_AGENCY_BIKE != 'true' && env.MT_IS_MAIN_REPO != 'true' && steps.mt-check-image-gen-required.outcome == 'success' }}
+      - name: MT commit image change (if added/updated)
+        if: ${{ env.MT_IS_AGENCY_BIKE != 'true' && env.MT_IS_MAIN_REPO != 'true' }}
         run: |
           git add -v -A -- ':(glob)**/*.png'
           if git diff --staged --quiet; then
