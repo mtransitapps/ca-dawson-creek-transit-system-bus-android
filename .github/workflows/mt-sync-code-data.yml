@@ -52,6 +52,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
+  MT_BOT_USER_NAME: ${{ vars.MT_BOT_USER_NAME }}
+  MT_BOT_USER_EMAIL: ${{ vars.MT_BOT_USER_EMAIL }}
   # git branches & sha
   MT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   MT_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
