@@ -163,6 +163,7 @@ jobs:
               TOTAL_LINES=$(wc -l < "$FILE");
               COLUMN_COUNT=$(awk -F',' 'NR==1{print NF; exit}' "$FILE");
               HEADER=$(head -n 1 "$FILE");
+              HEADER=${HEADER%$'\r'};
               echo "::group::$FILE (lines=$TOTAL_LINES, columns=$COLUMN_COUNT)";
               echo "Header: $HEADER";
               echo "Preview (first 100 lines, numbered):";
@@ -171,7 +172,7 @@ jobs:
                 echo "Preview truncated ($TOTAL_LINES total lines).";
               fi
               echo "::endgroup::";
-            done < <(find "$DIR" -maxdepth 1 -type f -name "*.txt" -print0)
+            done < <(find "$DIR" -maxdepth 1 -type f -name "*.txt" -print0 | sort -z)
 
             if [ "$TXT_FILES_FOUND" = false ]; then
               echo "No TXT files found in $DIR";
