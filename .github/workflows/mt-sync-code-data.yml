@@ -132,7 +132,7 @@ jobs:
 
       - name: MT commit code change
         if: ${{ github.ref == format('refs/heads/{0}', env.MT_DEFAULT_BRANCH_NAME) || github.event_name == 'pull_request' }}
-        run: ./commit_code_change.sh
+        run: ./sh/git/commit_code_change.sh
 
       # DOWNLOAD (not PR, OR PR without archive data) AND PARSE (NOT main repo/bike)
       - name: MT download data (& archive)
@@ -239,15 +239,15 @@ jobs:
 
       - name: MT commit data change
         if: ${{ env.MT_IS_AGENCY_BIKE != 'true' && env.MT_IS_MAIN_REPO != 'true' }}
-        run: ./commit_data_change.sh
+        run: ./sh/git/commit_data_change.sh
       # ----------
 
-      - name: MT generate images if required
+      - name: MT generate images if required w/ shared setup
         id: mt-image-gen
         if: ${{ env.MT_IS_MAIN_REPO != 'true' && steps.mt-check-image-gen-required.outcome == 'success' }}
         continue-on-error: true # nice to have
         run: |
-          ./commons/code_setup.sh;
+          ./commons/sh/shared_setup.sh;
         env:
           MT_GENERATE_IMAGES: true
 
